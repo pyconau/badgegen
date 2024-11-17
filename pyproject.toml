@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "pyconau-badgegen"
+version = "0.2.0"
+description = ""
+authors = ["Daisy Leigh Brenecki <daisy@daisy.wtf>", "Jack Skinner <gday@jackskinner.com.au>"]
+readme = "README.md"
+#packages = [{include = "pyconau_2023_badge_svg"}]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pillow = "^11.0.0"
+jinja2 = "^3.1.2"
+attrs = "^23.1.0"
+requests = "^2.31.0"
+qrcode = "^8.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+# [tools.setuptools]
+# packages = ["src"]
