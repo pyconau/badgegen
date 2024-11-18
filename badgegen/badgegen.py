@@ -38,15 +38,18 @@ class BadgeRuntime:
 
 
 def load_runtime(directory):
+    print (f"Loading runtime from {directory}")
     if not os.path.exists(directory):
+        print("No directory found")
         return BadgeRuntime()
         
     with open(f"{directory}/badgegen.toml", "rb") as f:
         CONFIG = tomllib.load(f)
 
+    
     with(open(f"{directory}/assets/badge.svg")) as f:
         BADGE_TEMPLATE = f.read()
-
+    
     with open(f"{directory}/assets/top-half-light.svg") as f:
         TOP_HALF_LIGHT = f.read()
 
@@ -170,17 +173,13 @@ def generate_badge(runtime, params: BadgeParams):
 
     with open(f'output/svgs/{params.order_code}.svg', 'w') as f:
         f.write(svg)
-    # inches to cm = 1 => 2.54
-    # svg is 210 units wide
-    #
-    # target 210mm
-    # == 21.0 / 2.54 = 8.2677165354 (inches)
+    # Our SVG is 210 x 297 units
     # A4 == 8.27 x 11.69 inches
     # A4 == 210 x 297 mm
-    
-    # 0.3937007874 inches per mm?
-    
-    subprocess.run(('svg2pdf', f'output/svgs/{params.order_code}.svg', f'output/pdfs/{params.order_code}.pdf', '--dpi', '3508', '--text-to-paths'), check=True)
+    # 2.54 cm = 1 inch
+    # 25.4 mm = 1 inch <- This is our DPI factor
+
+    subprocess.run(('svg2pdf', f'output/svgs/{params.order_code}.svg', f'output/pdfs/{params.order_code}.pdf', '--dpi', '25.4', '--text-to-paths'), check=True)
 
 
 WATTLE_LEAF = '#00B159'
@@ -421,7 +420,7 @@ parser.add_argument('-x', '--experimental', help="Experimental behaviour", defau
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    directory = args.directory or datetime.datetime.now(datetime.timezone.utc).year
+    directory = args.directory or str(datetime.datetime.now(datetime.timezone.utc).year)
     
     install_fonts(directory)
 
