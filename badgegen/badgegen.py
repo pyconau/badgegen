@@ -24,20 +24,23 @@ import qrcode.image.svg
 
 @attrs.define
 class BadgeRuntime:
-    config: dict
-    badge_template: str
-    top_half_light: str
-    bottom_half_light: str
-    top_half_tint: str
-    bottom_half_tint: str
-    pt_sans_bold: PIL.ImageFont.ImageFont
-    pt_sans_bold_condensed: PIL.ImageFont.ImageFont
-    pt_sans_regular: PIL.ImageFont.ImageFont
-    pt_sans_regular_condensed: PIL.ImageFont.ImageFont
+    config: dict = None
+    badge_template: str = None
+    top_half_light: str = None
+    bottom_half_light: str = None
+    top_half_tint: str = None
+    bottom_half_tint: str = None
+    pt_sans_bold: PIL.ImageFont.ImageFont = None
+    pt_sans_bold_condensed: PIL.ImageFont.ImageFont = None
+    pt_sans_regular: PIL.ImageFont.ImageFont = None
+    pt_sans_regular_condensed: PIL.ImageFont.ImageFont = None
     template: j2.Template = None
 
 
 def load_runtime(directory):
+    if not os.path.exists(directory):
+        return BadgeRuntime()
+        
     with open(f"{directory}/badgegen.toml", "rb") as f:
         CONFIG = tomllib.load(f)
 
@@ -167,8 +170,17 @@ def generate_badge(runtime, params: BadgeParams):
 
     with open(f'output/svgs/{params.order_code}.svg', 'w') as f:
         f.write(svg)
-
-    subprocess.run(('svg2pdf', f'output/svgs/{params.order_code}.svg', f'output/pdfs/{params.order_code}.pdf', '--dpi', '204'), check=True)
+    # inches to cm = 1 => 2.54
+    # svg is 210 units wide
+    #
+    # target 210mm
+    # == 21.0 / 2.54 = 8.2677165354 (inches)
+    # A4 == 8.27 x 11.69 inches
+    # A4 == 210 x 297 mm
+    
+    # 0.3937007874 inches per mm?
+    
+    subprocess.run(('svg2pdf', f'output/svgs/{params.order_code}.svg', f'output/pdfs/{params.order_code}.pdf', '--dpi', '3508', '--text-to-paths'), check=True)
 
 
 WATTLE_LEAF = '#00B159'
@@ -351,12 +363,61 @@ def install_fonts(directory):
     for font in fonts:
         filename = os.path.basename(font)
         shutil.copy(font, destination_dir)
+
+
+def do_experimental(runtime):
+    admissions = []
+    # get all orders
+    for order in paginate('https://pretix.eu/api/v1/organizers/pyconau/events/2024/orders/'):
+        # "answers": [
+        #     {
+        #         "question": 140758,
+        #         "answer": "Jack",
+        #         "question_identifier": "primary_name",
+        #         "options": [],
+        #         "option_identifiers": []
+        #     },
+        #     {
+        #         "question": 140759,
+        #         "answer": "Skinner",
+        #         "question_identifier": "additional_names",
+        #         "options": [],
+        #         "option_identifiers": []
+        #     },
+        
+        for position in order['positions']:
+
+            # is admission by config'd ID's? e.g. "569203"
+            # => Is a new admission ticket
+            # => Generate a fuzzy ID
+            # is addon to existing admission?
+            # => Attach to that badge as an entitlement based on product ID
+            # can fuzzy id match?
+            # Spit out edge case?
+
+            
+            fuzzy = {}
+            for answers in position['answers']:
+                if answers['question'] in [140758, 140759]:
+                    names[answers['question']] = answers['answer']
+            print(names)
+        
+        # names = [answer in order['answers'] if answer['question'] in [140758, 140759] else '']
+        print(names)
+        admission_key = f"{order['email']}"
+        break
+
+
     
+    print(len(orders))
+            
+
 
 parser = argparse.ArgumentParser(description="Generate badges for PyCon AU.")
 parser.add_argument('-a', '--all', help="generate all badges", default=False, action='store_true')
 parser.add_argument('-o', '--order', type=str, help="generate badges for a given order", default=None, action='store')
 parser.add_argument('-d', '--directory', type=str, help="directory for assets. Defaults current year", default=None, action='store')
+parser.add_argument('-x', '--experimental', help="Experimental behaviour", default=False, action='store_true')
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -365,6 +426,10 @@ if __name__ == "__main__":
     install_fonts(directory)
 
     runtime = load_runtime(directory)
+
+    if args.experimental:
+        print("Experimental behaviour")
+        do_experimental(runtime)
 
     runtime.template = j2.Environment(
         loader=j2.DictLoader({'badge.svg.j2': runtime.badge_template}),
@@ -386,7 +451,7 @@ if __name__ == "__main__":
         
         order = fetch(f'https://pretix.eu/api/v1/organizers/pyconau/events/2024/orders/{args.order}/')
         do_order(runtime, order)
-        
+    
     else:
         parser.print_help()
         sys.exit(1)
