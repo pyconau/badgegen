@@ -200,8 +200,8 @@ SPRINTS_MONDAY = 569215 #unused
 SPRINTS_TUESDAY = 569216 #unused
 
 TEAM_MEMBERS = [
-    569202
-     637767 #Late Team Member
+    569202,
+    637767 #Late Team Member
 ]
 
 SPEAKERS = {
