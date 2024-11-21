@@ -207,6 +207,7 @@ TEAM_MEMBERS = [
 SPEAKERS = {
     569208,  # Tracks Only Speaker
     569203,  # Speaker
+    637766,  # Late Speaker
 }
 SPONSOR_GUEST = 569205
 
@@ -227,7 +228,7 @@ TICKET_ITEMS = {
     569198,  # Enthusiast
     572937,  # Enthusiast LB
     569199,  # Student
-    569199,  # Contributor
+    569200,  # Contributor
     629547,  # Exhibitor
     *TEAM_MEMBERS,  # Team Member
     SPONSOR_GUEST,  # Sponsor Guest
