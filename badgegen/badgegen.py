@@ -199,7 +199,11 @@ SPRINTS_ONLY = 569209
 SPRINTS_MONDAY = 569215 #unused
 SPRINTS_TUESDAY = 569216 #unused
 
-TEAM_MEMBER = 569202 # 637767 Late Team Member
+TEAM_MEMBERS = [
+    569202
+     637767 #Late Team Member
+]
+
 SPEAKERS = {
     569208,  # Tracks Only Speaker
     569203,  # Speaker
@@ -289,7 +293,7 @@ def do_order(runtime, order):
             bg_color = runtime.config['badge_design']['RED_CENTRE']
             lozenge_text = "SAFETY TEAM"
             generate_low_badge = True
-        elif position['item'] == runtime.config['pretix_tickets']['TEAM_MEMBER']:
+        elif position['item'] in runtime.config['pretix_tickets']['TEAM_MEMBERS']:
             bg_ribbon_only = False
             generate_low_badge = True
             if questions['team'] == 'Core Team':
