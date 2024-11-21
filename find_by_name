@@ -1,12 +1,7 @@
-#!/bin/bash
-(( $# < 1 )) && {
+#!/bin/sh
+[ "$#" -lt 1 ] && {
 	echo "Usage: $0 search_term"
   exit 1
 }
-files=()
-while read -r file;
-do
-	files+=("$file")
-done < <(grep -l -i "$*" output/svgs/*.svg | sed 's/output/svg/pdf/g')
 printf 'Matches:\n'
-printf '%s\n' "${files[@]}"
+grep -l -i "$*" output/svgs/*.svg | sed 's/svg/pdf/g'
