@@ -224,6 +224,7 @@ TICKET_ITEMS = {
     572937,  # Enthusiast LB
     569199,  # Student
     569199,  # Contributor
+    629547,  # Exhibitor
     TEAM_MEMBER,  # Team Member
     SPONSOR_GUEST,  # Sponsor Guest
     *SPEAKERS,
